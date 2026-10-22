@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./dist-test",
+    "noEmit": false
+  },
+  "include": [
+    "tests/payment_and_security.test.ts",
+    "src/lib/server-data.ts",
+    "src/lib/razorpay.ts",
+    "src/types/**/*.ts"
+  ]
+}
