@@ -1,15 +1,4 @@
-/**
- * Supabase Client Architectural Boundary
- * 
- * NOTE ON ARCHITECTURE:
- * Real database calls require valid Supabase environment credentials
- * (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY).
- * 
- * When credentials are not configured, the application operates in 
- * Demoware / Architectural Staging Mode using isolated seed repositories.
- * We do not claim database persistence or authentication is working
- * until live credentials are provided and tested.
- */
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export interface SupabaseConfigStatus {
   isConfigured: boolean;
@@ -19,10 +8,16 @@ export interface SupabaseConfigStatus {
   statusText: string;
 }
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
 export function getSupabaseConfigStatus(): SupabaseConfigStatus {
-  const hasUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id'));
-  const hasAnonKey = Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('your-anon-key'));
-  const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY.includes('your-service-role-key'));
+  const hasUrl = Boolean(supabaseUrl && !supabaseUrl.includes('your-project-id'));
+  const hasAnonKey = Boolean(supabaseAnonKey && !supabaseAnonKey.includes('your-anon-key'));
+  const hasServiceKey = Boolean(
+    process.env.SUPABASE_SERVICE_ROLE_KEY && 
+    !process.env.SUPABASE_SERVICE_ROLE_KEY.includes('your-service-role-key')
+  );
 
   const isConfigured = hasUrl && hasAnonKey;
 
@@ -35,4 +30,23 @@ export function getSupabaseConfigStatus(): SupabaseConfigStatus {
       ? 'Supabase configured with active credentials' 
       : 'Demo Mode: Supabase credentials not detected; using isolated mock seed data',
   };
+}
+
+let browserClient: SupabaseClient | null = null;
+
+export function getSupabaseBrowserClient(): SupabaseClient | null {
+  const status = getSupabaseConfigStatus();
+  if (!status.isConfigured) return null;
+
+  if (!browserClient) {
+    browserClient = createClient(supabaseUrl, supabaseAnonKey, {
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
+        },
+      },
+    });
+  }
+
+  return browserClient;
 }
