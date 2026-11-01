@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { transitionServerOrderStatus } from '@/lib/server-data';
 import { OrderStatus } from '@/types';
 
@@ -16,6 +17,17 @@ export async function POST(
         { error: 'Missing required fields: targetStatus and actingUserId' },
         { status: 400 }
       );
+    }
+
+    const supabase = getSupabaseServerClient();
+    if (supabase) {
+      await supabase
+        .from('orders')
+        .update({
+          status: targetStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', orderId);
     }
 
     const updatedOrder = transitionServerOrderStatus(

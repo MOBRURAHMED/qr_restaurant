@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { verifyManualPayment } from '@/lib/server-data';
 
 export async function POST(
@@ -15,6 +16,17 @@ export async function POST(
         { error: 'Missing required field: actingUserId' },
         { status: 400 }
       );
+    }
+
+    const supabase = getSupabaseServerClient();
+    if (supabase) {
+      await supabase
+        .from('orders')
+        .update({
+          payment_status: 'paid',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', orderId);
     }
 
     const updatedOrder = verifyManualPayment(orderId, actingUserId, notes);
