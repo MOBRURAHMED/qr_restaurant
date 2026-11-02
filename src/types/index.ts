@@ -71,7 +71,9 @@ export interface RestaurantPaymentSettings {
   upiQrImagePath?: string;
   upiId?: string;
   payeeName?: string;
+  gatewayMode?: 'custom' | 'platform'; // 'custom' for restaurant's own keys, 'platform' for shared SaaS gateway
   razorpayKeyId?: string;
+  razorpayKeySecret?: string; // encrypted or masked in responses
   razorpayConnectedAccountId?: string;
   updatedAt: string;
 }

@@ -872,19 +872,45 @@ export default function RestaurantAdminPage() {
             </div>
 
             {/* Section C: Razorpay Multi-Merchant Gateway Architecture */}
-            <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 p-5 space-y-3">
+            <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 p-5 space-y-4">
               <div className="flex items-center space-x-2 text-sm font-bold text-stone-900 dark:text-stone-100">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Razorpay Gateway Architecture (Multi-Tenant Onboarding)</span>
+                <span>Custom Payment Gateway Settings (Use Your Own Razorpay or Platform)</span>
               </div>
               <p className="text-xs text-stone-500 leading-relaxed">
-                Online payments (Cards &amp; UPI App Intent) are processed via Razorpay APIs. Each restaurant can be associated with its own approved Razorpay Merchant Account or routed through platform settlement.
+                You can connect your own business Razorpay Key ID and Secret to receive card and online payments directly into your registered bank account with 0% platform intermediary interference.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2">
+              {/* Mode Selector */}
+              <div className="flex items-center space-x-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleUpdatePaymentField('gatewayMode', 'custom')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                    paymentSettings.gatewayMode !== 'platform'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700'
+                  }`}
+                >
+                  Own Merchant Gateway
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUpdatePaymentField('gatewayMode', 'platform')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                    paymentSettings.gatewayMode === 'platform'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700'
+                  }`}
+                >
+                  Platform Gateway (Shared)
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
                 <div>
                   <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                    Merchant Key ID (Optional Restaurant Override)
+                    Your Razorpay Key ID
                   </label>
                   <input
                     type="text"
@@ -893,26 +919,26 @@ export default function RestaurantAdminPage() {
                     onChange={(e) => handleUpdatePaymentField('razorpayKeyId', e.target.value)}
                     className="w-full p-2.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 font-mono"
                   />
-                  <p className="text-[10px] text-stone-400 mt-1">Leave blank to use platform gateway account.</p>
+                  <p className="text-[10px] text-stone-400 mt-1">Found in Razorpay Dashboard ➔ Settings ➔ API Keys.</p>
                 </div>
 
                 <div>
                   <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                    Connected Account ID (Razorpay Route / Marketplace)
+                    Your Razorpay Key Secret (Server-Encrypted)
                   </label>
                   <input
-                    type="text"
-                    placeholder="acc_..."
-                    value={paymentSettings.razorpayConnectedAccountId || ''}
-                    onChange={(e) => handleUpdatePaymentField('razorpayConnectedAccountId', e.target.value)}
+                    type="password"
+                    placeholder="••••••••••••••••••••••••"
+                    value={paymentSettings.razorpayKeySecret || ''}
+                    onChange={(e) => handleUpdatePaymentField('razorpayKeySecret', e.target.value)}
                     className="w-full p-2.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 font-mono"
                   />
-                  <p className="text-[10px] text-stone-400 mt-1">Direct payout transfer to restaurant bank account.</p>
+                  <p className="text-[10px] text-stone-400 mt-1">Used exclusively on server-side to sign and verify checkout transactions.</p>
                 </div>
               </div>
 
               <div className="p-3 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl text-[11px] text-stone-500 mt-2">
-                🔒 <strong>Security Enforced:</strong> Key Secrets and webhook secrets are stored exclusively in server environment variables or encrypted secrets vaults. Key Secrets are never exposed to browser memory or client bundles.
+                🔒 <strong>Full Owner Independence:</strong> When configured, customer card and netbanking charges settle directly into your linked bank account. Or turn off online card gateway and use your <strong>Static UPI Stand QR</strong> for 100% zero-fee bank settlements!
               </div>
             </div>
           </div>

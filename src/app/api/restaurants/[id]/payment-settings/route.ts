@@ -32,8 +32,10 @@ export async function GET(
           upiQrImagePath: dbSettings.upi_qr_image_path || undefined,
           upiId: dbSettings.upi_id || undefined,
           payeeName: dbSettings.payee_name || undefined,
+          gatewayMode: dbSettings.gateway_mode || 'custom',
           razorpayKeyId: dbSettings.razorpay_key_id || undefined,
           razorpayConnectedAccountId: dbSettings.razorpay_account_id || undefined,
+          hasCustomSecret: Boolean(dbSettings.razorpay_key_secret),
           updatedAt: dbSettings.updated_at,
         },
         source: 'supabase',
@@ -70,7 +72,11 @@ export async function PUT(
       if (body.upiQrImagePath !== undefined) updates.upi_qr_image_path = body.upiQrImagePath;
       if (body.upiId !== undefined) updates.upi_id = body.upiId;
       if (body.payeeName !== undefined) updates.payee_name = body.payeeName;
+      if (body.gatewayMode !== undefined) updates.gateway_mode = body.gatewayMode;
       if (body.razorpayKeyId !== undefined) updates.razorpay_key_id = body.razorpayKeyId;
+      if (body.razorpayKeySecret !== undefined && body.razorpayKeySecret.trim() !== '') {
+        updates.razorpay_key_secret = body.razorpayKeySecret.trim();
+      }
       if (body.razorpayConnectedAccountId !== undefined) updates.razorpay_account_id = body.razorpayConnectedAccountId;
 
       const { data: updatedDb, error } = await supabase
@@ -86,7 +92,7 @@ export async function PUT(
         updateServerPaymentSettings(restaurantId, body);
         return NextResponse.json({
           success: true,
-          message: 'Payment settings updated in Supabase',
+          message: 'Payment settings saved to Supabase',
           settings: {
             restaurantId: updatedDb.restaurant_id,
             upiQrEnabled: updatedDb.upi_qr_enabled,
@@ -96,8 +102,10 @@ export async function PUT(
             upiQrImagePath: updatedDb.upi_qr_image_path || undefined,
             upiId: updatedDb.upi_id || undefined,
             payeeName: updatedDb.payee_name || undefined,
+            gatewayMode: updatedDb.gateway_mode || 'custom',
             razorpayKeyId: updatedDb.razorpay_key_id || undefined,
             razorpayConnectedAccountId: updatedDb.razorpay_account_id || undefined,
+            hasCustomSecret: Boolean(updatedDb.razorpay_key_secret),
             updatedAt: updatedDb.updated_at,
           },
         });
@@ -112,7 +120,9 @@ export async function PUT(
       upiQrImagePath: body.upiQrImagePath !== undefined ? body.upiQrImagePath : undefined,
       upiId: body.upiId !== undefined ? body.upiId : undefined,
       payeeName: body.payeeName !== undefined ? body.payeeName : undefined,
+      gatewayMode: body.gatewayMode !== undefined ? body.gatewayMode : undefined,
       razorpayKeyId: body.razorpayKeyId !== undefined ? body.razorpayKeyId : undefined,
+      razorpayKeySecret: body.razorpayKeySecret !== undefined ? body.razorpayKeySecret : undefined,
       razorpayConnectedAccountId: body.razorpayConnectedAccountId !== undefined ? body.razorpayConnectedAccountId : undefined,
     });
 
